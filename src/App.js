@@ -1,45 +1,67 @@
+import React, { useContext, useEffect, useState } from 'react';
 import { Route, Redirect, Switch, Link } from 'react-router-dom';
+import Routes from './router/Routes';
+import routers from './router/index';
 
-import './App.css';
-
-import Home from './pages/test2/home';
-import TodoList from './pages/test1/todolist';
+import appless from './App.module.less';
 
 function AsideBar() {
   return (
-    <aside className="aside">
-        <Link to="/test2" className="aside-item">home</Link>
-        <Link to={{pathname:'/test1', query:{content:1234}}} className="aside-item">todoList</Link>
+    <aside className={appless.aside}>
+      <Link to="/test2" className={appless.asideItem}>home</Link>
+      <Link to={{ pathname: '/todolist', query: { content: 1234 } }} className={appless.asideItem}>todoList</Link>
+      <Link to='/error' className={appless.asideItem}>Error Page</Link>
     </aside>
   );
 }
 
-function NavBar() {
+function NavBar(props) {
+  const [showDrawer, setShowDrawer] = useState(false);
+  const toggleDrawer = (state) => {
+    setShowDrawer(state);
+  }
+
   return (
-    <header className="header">
-        <div className="header-content">
-            <Link to="/test2" className="header-item">home</Link>
-            <Link to="/test1" className="header-item">todoList</Link>
+    <>
+      <Drawer showDrawer={showDrawer} toggleDrawer={toggleDrawer}/>
+      <header className={appless.header}>
+        <div className={appless.headerContent}>
+          <ul className={appless.leftNav}>
+            <li><Link to="/test2" className={appless.headerItem}>home</Link></li>
+            <li><Link to="/test1" className={appless.headerItem}>todoList</Link></li>
+          </ul>
+          <ul className={appless.rightNav}>
+            <li onClick={() => toggleDrawer(!showDrawer)}><i className="iconfont icon icon-shezhi"></i></li>
+          </ul>
         </div>
-    </header>
+      </header>
+    </>
   );
 }
 
 function App() {
 
   return (
-    <div className="div">
+    <>
+      <div className={appless.div}>
         <NavBar/>
-        <div className="content">
-            <AsideBar/>
-            <main className="router-view">
-                <Switch>
-                    <Redirect exact from="/" to="/test2"></Redirect>
-                    <Route path="/test2" component={Home}></Route>
-                    <Route path="/test1" component={TodoList}></Route>
-                </Switch>
-            </main>
+        <div className={appless.content}>
+          <AsideBar />
+          <main className={appless.routerView}>
+            <Routes routers={routers}/>
+          </main>
         </div>
+      </div>
+    </>
+  );
+}
+
+function Drawer(props) {
+
+  return (
+    <div className={appless.drawer} style={{visibility:(props.showDrawer ? 'visible' : 'hidden')}}>
+      <div className={appless.shade} onClick={() => props.toggleDrawer(!props.showDrawer)} style={{animationName:(props.showDrawer ? 'showShade' : 'hideShade')}}></div>
+      <section className={appless.content} style={{animationName:(props.showDrawer ? 'showContent' : 'hideContent')}}></section>
     </div>
   );
 }

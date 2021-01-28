@@ -1,6 +1,7 @@
 * {
   margin: 0;
   padding: 0;
+  transition: all .3s;
 }
 html,body{
   width: 100%;
@@ -12,8 +13,34 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+button,i{
+  cursor: pointer;
 }
+button,input,textarea{
+  outline: none;
+  box-sizing: border-box;
+  border-radius: 8px;
+}
+input{
+  padding: 0 10px;
+  border: 1px solid #c9c9c9;
+}
+button:hover{
+  box-shadow: 0px 3px 10px #d5d5d5;
+}
+input:focus,textarea:focus{
+  border-color: #044581;
+}
+button{
+  border: none;
+  box-shadow: none;
+  color: #fff;
+  background-color: #044581;
+  padding: 0px 30px;
+  height: 30px;
+  line-height: 30px;
+}
+ul,li{
+  list-style: none;
+}
+

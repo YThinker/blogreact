@@ -1,0 +1,54 @@
+@import '../../../assets/less/shake.less';
+.todolist{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    padding: 20px 20px;
+
+    .todoinput{
+        height: 30px;
+        width: 100%;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 15px;
+        input,button{
+            display: inline-block;
+            height: 100%;
+            line-height: 30px;
+        }
+        input{
+            padding: 0 10px;
+            margin-right: 10px;
+            width: 300px;
+            border: 1px solid #c9c9c9;
+            transition: all .3s;
+        }
+    }
+    .todoitem{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 30px;
+        margin-top: 15px;
+        p{
+            height: 100%;
+            width: 300px;
+            line-height: 30px;
+            font-size: 14px;
+        }
+        img:hover{
+            animation: shake .8s linear infinite;
+        }
+        .icon{
+            width: 1.5em;
+            height: 1.5em;
+            vertical-align: -0.15em;
+            fill: currentColor;
+            overflow: hidden;
+            cursor: pointer;
+        }
+    }
+    button:hover{
+        box-shadow: 0px 3px 10px #d5d5d5;
+    }
+}

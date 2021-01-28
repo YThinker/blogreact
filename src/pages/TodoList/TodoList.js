@@ -1,0 +1,98 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useEffect, useState, useContext } from 'react';
+import './style/todolist.less';
+import inputModal from '../../assets/component/inputModal';
+import alert from '../../assets/component/alert';
+import deleteIcon from '../../assets/todolist/delete.svg';
+// import qs from 'query-string';
+
+function TodoList(props) {
+    const [todoList,setTodoList] = useState(['第一周']);
+
+    function handleDelete(index){
+        let todoList_copy = [...todoList];
+        todoList_copy.splice(index,1);
+        setTodoList(todoList_copy);
+    };
+    function handleInput(item) {
+        if(!!item){
+            setTodoList(todoList.concat([item]));
+            console.log(todoList);
+        }
+        else {
+            alert().open({
+                context: '请输入计划'
+            });
+        }
+    }
+
+    // const [queryContent] = useState(props.location.query.content);
+    // useEffect(() => {
+    //     handleInput(queryContent);
+    // },[queryContent]);
+
+    return (
+        <section className="todolist">
+            <TodoInput getItem={handleInput}></TodoInput>
+            {
+                todoList.map( (item, index) => {
+                    // console.log(item,index);
+                    return <TodoItem
+                             key={item}
+                             id={index}
+                             todoItem={item} 
+                             deleteItem={handleDelete}
+                            />
+                })
+            }
+        </section>
+    );
+}
+
+function TodoItem(props) {
+    console.log('TodoItem');
+
+    return (
+        <div className="todoitem">
+            <p>{props.todoItem}</p>
+            <img className="icon" src={deleteIcon} alt="删除" onClick={() => props.deleteItem(props.id)}/>
+        </div>
+    );
+}
+
+function TodoInput(props) {
+    // const obj = useContext(AlertShow);
+    // console.log(obj);
+
+    const [todoInput,setTodoInput] = useState('');
+    console.log(!!todoInput);
+    const addInput = () => {
+        props.getItem(todoInput);
+        setTodoInput('');
+        // else {
+        //     let conf = {show:true, content:'请输入内容'};
+        //     setAlertConfig(conf);
+        //     setTimeout(function () {
+        //         setAlertConfig({show:false});
+        //     },2000);
+        // }
+    }
+
+    const openModal = () => {
+        inputModal().open({
+            confirm: (e) => {
+                props.getItem(e);
+            }
+        })
+    }
+
+    return (
+        <div className="todoinput">
+            <input type="text" placeholder="请输入计划" value={todoInput} onChange={(e) => setTodoInput(e.target.value)} onFocus={openModal}/>
+            {/* <button onClick={addInput}>添加</button> */}
+            <button onClick={openModal}>添加</button>
+        </div>
+    );
+}
+
+export default TodoList;
