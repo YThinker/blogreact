@@ -1,8 +1,8 @@
-import TodoList from '../../pages/TodoList/TodoList';
+import TodoList from '@/pages/TodoList/TodoList';
 
 export default [
     {
-        path: '/todolist',
+        path: '/index/todolist',
         component: TodoList,
         // requiredAuth: true,
     }

@@ -7,6 +7,7 @@ function RouterGuard(props) {
     let thisrouterConf = props.routers.find( conf => conf.path === pathname ); //将要跳转的路由配置
     let isLogin = sessionStorage.getItem('isLogin'); //是否登录
     console.log('isLogin',isLogin);
+    console.log('pathname:',pathname,'routers:',props.routers,'thisrouterConf:',thisrouterConf);
     // 如果未登录
     if( !isLogin ){
         if( pathname==='/login' ){
@@ -34,7 +35,7 @@ function RouterGuard(props) {
 function Routes(props) {
     return (
         <Switch>
-            <Redirect exact from="/" to="/home" />
+            <Redirect exact from="/" to="/index/todolist" />
             <RouterGuard routers={props.routers}/>
         </Switch>
     );

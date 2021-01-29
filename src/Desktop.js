@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import deskless from './Desktop.module.less';
-import bg from './assets/stock-photo-284139719.jpg';
+import bg from './assets/img/stock-photo-284139719.jpg';
 
 import DesktopMain from './pages/DesktopMain/DesktopMain';
 
