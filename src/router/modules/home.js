@@ -5,6 +5,6 @@ export default [
         path: '/index/todolist',
         exact: true,
         component: TodoList,
-        // requiredAuth: true,
+        requiredAuth: true,
     }
 ];
