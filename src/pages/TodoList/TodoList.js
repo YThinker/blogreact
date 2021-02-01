@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState, useContext } from 'react';
-import './style/todolist.less';
+import todolistless from './todolist.module.less';
 import inputModal from '../../assets/component/inputModal';
 import alert from '../../assets/component/alert';
 import deleteIcon from '../../assets/todolist/delete.svg';
@@ -32,7 +32,7 @@ function TodoList(props) {
     // },[queryContent]);
 
     return (
-        <section className="todolist">
+        <section className={todolistless.todolist}>
             <TodoInput getItem={handleInput}></TodoInput>
             {
                 todoList.map( (item, index) => {
@@ -53,9 +53,9 @@ function TodoItem(props) {
     console.log('TodoItem');
 
     return (
-        <div className="todoitem">
+        <div className={todolistless.todoitem}>
             <p>{props.todoItem}</p>
-            <img className="icon" src={deleteIcon} alt="删除" onClick={() => props.deleteItem(props.id)}/>
+            <img className={todolistless.icon} src={deleteIcon} alt="删除" onClick={() => props.deleteItem(props.id)}/>
         </div>
     );
 }
@@ -87,7 +87,7 @@ function TodoInput(props) {
     }
 
     return (
-        <div className="todoinput">
+        <div className={todolistless.todoinput}>
             <input type="text" placeholder="请输入计划" value={todoInput} onChange={(e) => setTodoInput(e.target.value)} onFocus={openModal}/>
             {/* <button onClick={addInput}>添加</button> */}
             <button onClick={openModal}>添加</button>

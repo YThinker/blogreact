@@ -24,15 +24,6 @@ class Modal extends Component{
             document.getElementById('inputModal').remove();
         },800);
     }
-    // close() {this.setState({show:false});}
-    // confirm = ()=>{
-    //     this.state.close();
-    //     return this.state.value;
-    // }
-    // open = (options)=>{
-    //     this.state.open();
-    //     this.setState({...options});
-    // }
 
     render(){
         let style = {

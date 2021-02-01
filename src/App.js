@@ -1,11 +1,13 @@
 import React from 'react';
-import Routes from './router/Routes';
 import routers from './router/index';
+import RenderRoutes from './router/RenderRoutes'
 
 function App() {
     console.log(routers);
     return (
-        <Routes routers={routers} />
+        <>
+            {RenderRoutes(routers)}
+        </>
     );
 }
 
