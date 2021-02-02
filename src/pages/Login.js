@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import loginBg from '../assets/img/loginBg.jpg';
 // import loginless from './Login.module.less';
 import { makeStyles } from '@material-ui/core';
-import { TextField, Container, Grid, Typography, Button } from '@material-ui/core';
+import { TextField, Container, Grid, Typography, Button, Icon } from '@material-ui/core';
+// import { ArrowLeftIcon } from '@material-ui/icons';
 
 export default function Login (props) {
     const loginless = useStyles();
 
     // true为登录，false为注册
-    const [loginType, setLoginType] = useState(true);
+    const [loginType, setLoginType] = useState(false);
 
     return (
         <Grid container
@@ -41,6 +42,10 @@ const LoginComponent = props => {
         <>
             <TextField className={loginless.input} label="用户名" variant="outlined" />
             <TextField className={loginless.input} label="密码" variant="outlined" />
+            <div className={loginless.smallBtnGroup}>
+                <Button className={loginless.smallBtnLeft} size="small" color="primary">没有账号?点击注册</Button>
+                <Button className={loginless.smallBtnRight} size="small" color="primary">忘了密码</Button>
+            </div>
             <Button className={loginless.button} size="large" variant="contained" color="primary">登录</Button>
         </>
     );
@@ -55,7 +60,10 @@ const SigninComponent = props => {
             <TextField className={loginless.input} label="用户名" variant="outlined" />
             <TextField className={loginless.input} label="密码" variant="outlined" />
             <TextField className={loginless.input} label="确认密码" variant="outlined" />
-            <Button className={loginless.button} size="large" variant="outlined" color="primary">注册</Button>
+            <div className={loginless.smallBtnGroup}>
+                <Button className={loginless.smallBtnLeft} startIcon={<Icon>arrow_left</Icon>} size="small" color="primary">返回</Button>
+            </div>
+            <Button className={loginless.button} size="large" variant="contained" color="primary">注册</Button>
         </>
     );
 };
@@ -77,6 +85,16 @@ const useStyles = makeStyles( theme => ({
     },
     button: {
         marginTop: '20px',
+    },
+    smallBtnGroup: {
+        display: 'flex',
+        justifyContent: 'space-between',
+    },
+    smallBtnLeft: {
+        // justifySelf: 'flex-start',
+    },
+    smallBtnRight: {
+        // justifySelf: 'flex-end',
     },
     form: {
         margin: '10% 0',
