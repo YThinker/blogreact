@@ -4,7 +4,8 @@ import loginBg from '../assets/img/loginBg.jpg';
 import { makeStyles } from '@material-ui/core';
 import { TextField, Container, Grid, Typography, Button, Icon, IconButton } from '@material-ui/core';
 import { FormControl, InputLabel, OutlinedInput, InputAdornment } from '@material-ui/core';
-import { Fade } from '@material-ui/core';
+// import { Transition } from 'react-transition-group';
+import Slide from '@/assets/component/Slide'
 
 export default function Login (props) {
     const loginless = useStyles();
@@ -27,24 +28,36 @@ export default function Login (props) {
                 className={loginless.form}
                 xs={10} sm={7} md={5} lg={3}
             >
-                <Fade in={loginType}>
-                    <Grid item className={loginless.title} style={{display:loginType?'block':'none',}}><Typography variant="h5" component="h5">登录</Typography></Grid>
-                </Fade>
-                <Fade in={!loginType}>
-                    <Grid item className={loginless.title} style={{display:loginType?'none':'block',}}><Typography variant="h5" component="h5">注册</Typography></Grid>
-                </Fade>
-                <Fade in={loginType}>
-                    <Grid item className={loginless.formComponent} style={{display:loginType?'block':'none',}}>
-                        <LoginComponent setLoginOrSignin={setLoginOrSignin}/>
-                    </Grid>
-                </Fade>
-                <Fade in={!loginType}>
-                    <Grid item className={loginless.formComponent} style={{display:loginType?'none':'block',}}>
-                        <SigninComponent setLoginOrSignin={setLoginOrSignin}/>
-                    </Grid>
-                </Fade>
+                <Slide in={loginType} timeout={500} unmountOnExit>
+                    <SwitchGrid loginType={true} setLoginOrSignin={setLoginOrSignin}/>
+                </Slide>
+                <Slide in={!loginType} timeout={500} unmountOnExit>
+                    <SwitchGrid className={loginless.mountedstyle} loginType={false} setLoginOrSignin={setLoginOrSignin}/>
+                </Slide>
             </Grid>
         </Grid>
+    );
+}
+
+const SwitchGrid = props => {
+    const loginless = useStyles();
+    
+    const loginType = props.loginType;
+
+    return (
+        <div className={loginless.switchGrid}>
+            <Grid item className={loginless.title}><Typography variant="h5" component="h5">{loginType?'登录':'注册'}</Typography></Grid>
+            {
+                loginType?
+                <Grid item className={loginless.formComponent}>
+                    <LoginComponent setLoginOrSignin={()=>props.setLoginOrSignin()}/>
+                </Grid>
+                :
+                <Grid item className={loginless.formComponent}>
+                    <SigninComponent setLoginOrSignin={()=>props.setLoginOrSignin()}/>
+                </Grid>
+            }
+        </div>
     );
 }
 
@@ -138,6 +151,9 @@ const SigninComponent = props => {
 };
 
 const useStyles = makeStyles( theme => ({
+    mountedstyle: {
+        display: 'none',
+    },
     contain: {
         backgroundImage: `url(${loginBg})`,
         background: "100% no-repeat",
@@ -145,9 +161,12 @@ const useStyles = makeStyles( theme => ({
         height: '100vh',
         textAlign: 'center',
     },
+    switchGrid: {
+        position: 'absolute',
+    },
     input: {
         marginTop: '20px',
-        width: '100%'
+        width: 'calc( 100% - 40px)',
     },
     title: {
         width: '100%'
@@ -158,6 +177,7 @@ const useStyles = makeStyles( theme => ({
     smallBtnGroup: {
         display: 'flex',
         justifyContent: 'space-between',
+        padding: '0 20px',
     },
     smallBtnLeft: {
         // justifySelf: 'flex-start',
@@ -168,11 +188,12 @@ const useStyles = makeStyles( theme => ({
     form: {
         margin: '10% 0',
         padding: '20px',
-        minHeight: '400px',
+        minHeight: '500px',
         maxWidth: '460px',
         backgroundColor: 'rgba(255,255,255,.4)',
         borderRadius: '10px',
         backdropFilter: 'blur(10px) saturate(1.8)',
+        overflow: 'hidden',
     },
     formComponent: {
         minHeight: '350px',
