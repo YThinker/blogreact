@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import loginBg from '../assets/img/loginBg.jpg';
+import loginBg from '../assets/img/loginBg.png';
 // import loginless from './Login.module.less';
 import { makeStyles } from '@material-ui/core';
 import { TextField, Grid, Typography, Button, Icon, IconButton } from '@material-ui/core';
@@ -190,6 +190,7 @@ const useStyles = makeStyles( theme => ({
         backgroundSize: 'cover',
         height: '100vh',
         textAlign: 'center',
+        overflow: 'auto',
     },
     switchGrid: {
         width: 'calc(100% - 40px)',
@@ -217,13 +218,13 @@ const useStyles = makeStyles( theme => ({
         marginTop: '8px',
     },
     form: {
-        margin: '10% 0',
+        margin: '5% 0',
         padding: '20px',
         minHeight: '500px',
         maxWidth: '460px',
-        backgroundColor: 'rgba(255,255,255,.4)',
+        backgroundColor: 'rgba(255,255,255,.3)',
         borderRadius: '10px',
-        backdropFilter: 'blur(10px) saturate(1.8)',
+        backdropFilter: 'blur(25px) saturate(1.8)',
         overflow: 'hidden',
     },
     formComponent: {

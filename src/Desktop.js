@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import deskless from './Desktop.module.less';
-import bg from './assets/img/stock-photo-284139719.jpg';
+// import bg from './assets/img/stock-photo-284139719.jpg';
 
 import DesktopMain from './pages/DesktopMain/DesktopMain';
 
@@ -11,7 +11,7 @@ function Desktop(props) {
             <Header />
             <div className={deskless.desktop}>
                 <DesktopMain />
-                <img src={bg} alt="" className={deskless.bg_img}/>
+                {/* <img src={bg} alt="" className={deskless.bg_img}/> */}
             </div>
         </>
     );
