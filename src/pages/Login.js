@@ -6,7 +6,8 @@ import { TextField, Grid, Typography, Button, Icon, IconButton, CircularProgress
 import { InputAdornment } from '@material-ui/core';
 import Slide from '@/assets/component/Slide'
 import common from '@/assets/js/common'
-import axios from 'axios';
+// import axios from 'axios';
+import interfaces from '@/interfaces/index';
 
 export default function Login (props) {
     const loginless = useStyles();
@@ -69,16 +70,11 @@ const LoginComponent = props => {
     const [getVerifyLoading, setGetVerifyLoading] = useState(false);
     const getVerifyCode = async () => {
         setGetVerifyLoading(true);
-        let res = await axios.request({
-            url: 'http://127.0.0.1:7002/getverifycode',
-            method: 'POST',
-            data: {},
-            withCredentials:true
-        });
+        let res = await interfaces.getVerifyCode();
         setGetVerifyLoading(false);
-        console.log(`data:image/svg+xml;base64,${window.btoa(res.data.data)}`);
-        setVerifyCodeUrl('data:image/svg+xml;base64,'+res.data.data);
-        // setVerifyCodeUrl(`data:image/svg+xml;base64,${window.btoa(res.data.data)}`);
+        if(res && res.data.ErrorCode === 0){
+            setVerifyCodeUrl(`data:image/svg+xml;base64,${res.data.data.imgData}`);
+        }
     };
     useEffect(() => {
         getVerifyCode();
@@ -231,6 +227,7 @@ const useStyles = makeStyles( theme => ({
         margin: '20px 0 0 10px',
         borderRadius: '2px',
         position: 'relative',
+        backgroundColor: '#dbd0b1',
         '& img': {
             height: '100%',
         },
