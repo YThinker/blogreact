@@ -70,7 +70,7 @@ const LoginComponent = props => {
     const [getVerifyLoading, setGetVerifyLoading] = useState(false);
     const getVerifyCode = async () => {
         setGetVerifyLoading(true);
-        let res = await interfaces.getVerifyCode();
+        let res = await interfaces.getVerifyCode({verifySymbol: 2});
         setGetVerifyLoading(false);
         if(res && res.data.ErrorCode === 0){
             setVerifyCodeUrl(`data:image/svg+xml;base64,${res.data.data.imgData}`);

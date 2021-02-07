@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-
-import './alert.less';
+import { Snackbar } from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
 
 class AlertComponent extends Component {
     state = {
         show: false,
-        context: '',
+        content: '',
+        type: 'success',
+        position: { vertical: 'top', horizontal: 'center' },
         timeNum: null,
     }
 
@@ -34,33 +36,16 @@ class AlertComponent extends Component {
     componentDidMount(){
         let timeNum = setTimeout(()=>{
             this.remove();
-        },3000);
+        },4000);
         this.setState({timeNum:timeNum});
     };
 
     render() {
         
         return (
-            <div style={{
-                position: 'fixed',
-                zIndex: '100',
-                backgroundColor: '#fdf6ec',
-                color: '#e6a23c',
-                width: '20%',
-                minHeight: '36px',
-                borderRadius: '4px',
-                left: '40%',
-                padding: '0 16px',
-                lineHeight: '36px',
-                fontSize: '15px',
-                animation: 'alertShow .3s',
-                top: this.state.show?'50px':'0',
-                transform: this.state.show?'translateY(0)':'translateY(-100%)',
-                opacity:this.state.show?'1':'0'
-            }}>
-                <span>{this.state.context}</span>
-                <i onClick={()=>this.close()}>X</i>
-            </div>
+            <Snackbar onClose={this.close} open={this.state.show} anchorOrigin={this.state.position}>
+                <Alert onClose={this.close} severity={this.state.type}>{this.state.content}</Alert>
+            </Snackbar>
         );
     }
 }
