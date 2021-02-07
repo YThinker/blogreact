@@ -13,9 +13,11 @@ export default async function fetch() {
             window._reacthistory.push('/login');
         } else if(res.data.ErrorCode === 10002){
             // 提示权限不足
+            alert().open({content: '权限不足', type: 'warning'});
         }
     } else {
         // 提示网络错误
+        alert().open({content: '发生未知错误', type: 'error'});
     }
     return res;
 }
@@ -28,7 +30,5 @@ const _request = ( actiontype='', data={}, method='POST', responseType='' ) => {
         data: data,
         params: method === 'GET' ? data : null,
         responseType: responseType,
-        withCredentials:true,
-        xsrfCookieName: 'x-csrf-token',
     });
 }
