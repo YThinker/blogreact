@@ -6,14 +6,14 @@ const url = 'http://127.0.0.1:7001';
 export default async function fetch() {
     const res = await _request(...arguments).catch( err => console.error(err) );
     console.log(res);
-    if(res.data.ErrorCode === 10001){
+    if(res && res.data.ErrorCode === 10001){
         // 跳转到登录页面 提示未登录
         alert().open({content: '未登录', type: 'warning'});
         window._reacthistory.push('/login');
-    } else if(res.data.ErrorCode === 10002){
+    } else if(res && res.data.ErrorCode === 10002){
         // 提示权限不足
         alert().open({content: '权限不足', type: 'warning'});
-    } else if(res.data.ErrorCode !== 200){
+    } else if(res && res.data.ErrorCode !== 200){
         alert().open({content: res.data.message, type: 'error'});
     }
     return res;

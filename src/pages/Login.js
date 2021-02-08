@@ -67,6 +67,7 @@ const LoginComponent = props => {
 
     const loginless = useStyles();
 
+    // 显示密码
     const [showPw, setShowPw] = useState(false);
 
     const refreshSecret = () => {
@@ -76,21 +77,25 @@ const LoginComponent = props => {
     }
     const [verifyCodeUrl, setVerifyCodeUrl] = useState('');
     const [getVerifyLoading, setGetVerifyLoading] = useState(false);
+    // 获取图片验证码
     const getVerifyCode = async () => {
+        // 获取临时Auth存入session
         let tempAuth = refreshSecret();
         sessionStorage.setItem('verifyTempAuth', tempAuth.toString());
-        console.log(tempAuth);
+        // 请求图片验证码
         setGetVerifyLoading(true);
-        let res = await interfaces.getVerifyCode({verifySymbol: 2});
+        let res = await interfaces.getVerifyCode({verifySymbol: 1});
         setGetVerifyLoading(false);
+        // 将验证码解密
         if(res && res.data.ErrorCode === 200){
-            setVerifyCodeUrl(`data:image/svg+xml;base64,${res.data.data.imgData}`);
+            setVerifyCodeUrl(`data:image/svg+xml;base64,${common.Decrypt(res.data.data.imgData)}`);
         }
     };
     useEffect(() => {
         getVerifyCode();
     },[]);
 
+    // 输入用户名密码验证码
     const [loginParams, setLoginParams] = useState({
         userId: '',
         password: '',
@@ -98,6 +103,7 @@ const LoginComponent = props => {
     });
     const handleChange = (e) => ChangeVal(e, setLoginParams);
 
+    // 登录
     const login = () => {
         let flag = CheckRequiredAll(loginParams, setErrorInput)
         if(flag){
@@ -105,6 +111,7 @@ const LoginComponent = props => {
         }
     };
 
+    // 输入校验
     const [errorInput, setErrorInput] = useState({
         userId: false,
         password: false,
