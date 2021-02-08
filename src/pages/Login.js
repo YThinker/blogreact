@@ -64,23 +64,32 @@ const SwitchGrid = props => {
 }
 
 const LoginComponent = props => {
+
     const loginless = useStyles();
 
+    const [showPw, setShowPw] = useState(false);
+
+    const refreshSecret = () => {
+        let secretHead = common.randomString(5, true);
+        let secretFoot = common.randomString(5, true);
+        return (secretHead+Date.now()+secretFoot).slice(20);
+    }
     const [verifyCodeUrl, setVerifyCodeUrl] = useState('');
     const [getVerifyLoading, setGetVerifyLoading] = useState(false);
     const getVerifyCode = async () => {
+        let tempAuth = refreshSecret();
+        sessionStorage.setItem('verifyTempAuth', tempAuth.toString());
+        console.log(tempAuth);
         setGetVerifyLoading(true);
         let res = await interfaces.getVerifyCode({verifySymbol: 2});
         setGetVerifyLoading(false);
-        if(res && res.data.ErrorCode === 0){
+        if(res && res.data.ErrorCode === 200){
             setVerifyCodeUrl(`data:image/svg+xml;base64,${res.data.data.imgData}`);
         }
     };
     useEffect(() => {
         getVerifyCode();
     },[]);
-
-    const [showPw, setShowPw] = useState(false);
 
     const [loginParams, setLoginParams] = useState({
         userId: '',
@@ -92,7 +101,7 @@ const LoginComponent = props => {
     const login = () => {
         let flag = CheckRequiredAll(loginParams, setErrorInput)
         if(flag){
-            console.log('CheckRequired',true);
+            console.log('CheckRequired',sessionStorage.getItem('verifyTempAuth'));
         }
     };
 
