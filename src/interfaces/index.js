@@ -8,5 +8,9 @@ export default {
     async getUserInfo(params) {
         let actiontype = '/getUserInfo';
         return fetch(actiontype, params, 'GET');
+    },
+    async login(params) {
+        let actiontype = '/login';
+        return fetch(actiontype, params);
     }
 };

@@ -42,5 +42,20 @@ export default {
         });
         decrypted = cryptojs.enc.Utf8.stringify(decrypted);
         return decrypted;
-    }　
+    },
+
+    // PBKDF2加密
+    PBKDF2Encrypt(str) {
+        const salt = "cr1yptoWo2rdArr6ayrm18q";
+        let key128Bits = cryptojs.PBKDF2(str, salt, {
+            keySize: 128 / 32
+        });
+        return key128Bits.toString();
+    },
+
+    // 头尾增加随机len位数字符串混淆
+    confusionStr(str, len=10) {
+        console.log(this.randomString(len)+str+this.randomString(len));
+        return this.randomString(len)+str+this.randomString(len);
+    },
 };

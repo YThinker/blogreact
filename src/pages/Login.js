@@ -104,10 +104,16 @@ const LoginComponent = props => {
     const handleChange = (e) => ChangeVal(e, setLoginParams);
 
     // 登录
-    const login = () => {
+    const login = async () => {
+        // 混淆加密算法
+        common.confusionStr(common.PBKDF2Encrypt("yxk980102"));
         let flag = CheckRequiredAll(loginParams, setErrorInput)
         if(flag){
-            console.log('CheckRequired',sessionStorage.getItem('verifyTempAuth'));
+            let res = await interfaces.login(loginParams);
+            console.log(res);
+            if(res && res.data.ErrorCode === 200){
+                console.log(res);
+            }
         }
     };
 
