@@ -1,44 +1,51 @@
-import React, { useEffect, useState } from 'react';
-import loginBg from '../assets/img/loginBg.png';
-// import loginless from './Login.module.less';
+import React, { useEffect, useState, createContext, useContext } from 'react';
+
 import { makeStyles } from '@material-ui/core';
 import { TextField, Grid, Typography, Button, Icon, IconButton, CircularProgress } from '@material-ui/core';
 import { InputAdornment } from '@material-ui/core';
 import Slide from '@/assets/component/Slide'
+
 import common from '@/assets/js/common'
-// import axios from 'axios';
 import interfaces from '@/interfaces/index';
+
+import loginBg from '../assets/img/loginBg.png';
+
+const LoginTypeContext = createContext();
 
 export default function Login (props) {
     const loginless = useStyles();
 
-    // true为登录，false为注册
-    const [loginType, setLoginType] = useState(true);
-    const setLoginOrSignin = (val) => {
-        setLoginType(!loginType);
-    };
+    // 1为登录，2为注册, 3为忘记密码
+    const [loginType, setLoginType] = useState(1);
+
+    console.log(loginType);
 
     return (
-        <Grid container
-            justify="center"
-            alignItems="center"
-            className={loginless.contain}
-        >
-            <Grid container item
+        <LoginTypeContext.Provider value={[loginType, setLoginType]}>
+            <Grid container
                 justify="center"
-                alignItems="flex-start"
-                className={loginless.form}
-                xs={10} sm={7} md={5} lg={3}
+                alignItems="center"
+                className={loginless.contain}
             >
-                <Slide in={loginType} timeout={500} unmountOnExit>
-                    <SwitchGrid loginType={true} setLoginOrSignin={setLoginOrSignin}/>
-                </Slide>
-                <Slide in={!loginType} timeout={500} unmountOnExit>
-                    <SwitchGrid loginType={false} setLoginOrSignin={setLoginOrSignin}/>
-                </Slide>
+                <Grid container item
+                    justify="center"
+                    alignItems="flex-start"
+                    className={loginless.form}
+                    xs={10} sm={7} md={5} lg={3}
+                >
+                    <Slide in={loginType===1} timeout={500} unmountOnExit>
+                        <SwitchGrid loginType={1}/>
+                    </Slide>
+                    <Slide in={loginType===2} timeout={500} unmountOnExit>
+                        <SwitchGrid loginType={2}/>
+                    </Slide>
+                    <Slide in={loginType===3} timeout={500} unmountOnExit>
+                        <SwitchGrid loginType={3}/>
+                    </Slide>
+                </Grid>
             </Grid>
-        </Grid>
-    );
+        </LoginTypeContext.Provider>
+    )
 }
 
 const SwitchGrid = props => {
@@ -48,15 +55,19 @@ const SwitchGrid = props => {
 
     return (
         <div className={loginless.switchGrid}>
-            <Grid item className={loginless.title}><Typography variant="h5" component="h5">{loginType?'登录':'注册'}</Typography></Grid>
+            <Grid item className={loginless.title}><Typography variant="h5" component="h5">{loginType===1?'登录':loginType===2?'注册':'忘记密码'}</Typography></Grid>
             {
-                loginType?
+                loginType===1?
                 <Grid item className={loginless.formComponent}>
-                    <LoginComponent setLoginOrSignin={()=>props.setLoginOrSignin()}/>
+                    <LoginComponent/>
+                </Grid>
+                :loginType===2?
+                <Grid item className={loginless.formComponent}>
+                    <SigninComponent/>
                 </Grid>
                 :
                 <Grid item className={loginless.formComponent}>
-                    <SigninComponent setLoginOrSignin={()=>props.setLoginOrSignin()}/>
+                    <ForgetPwdComponent/>
                 </Grid>
             }
         </div>
@@ -64,11 +75,12 @@ const SwitchGrid = props => {
 }
 
 const LoginComponent = props => {
-
     const loginless = useStyles();
 
     // 显示密码
     const [showPw, setShowPw] = useState(false);
+
+    const [loginType, setLoginType] = useContext(LoginTypeContext);
 
     const refreshSecret = () => {
         let secretHead = common.randomString(5, true);
@@ -105,15 +117,17 @@ const LoginComponent = props => {
 
     // 登录
     const login = async () => {
-        // 混淆加密算法
-        common.confusionStr(common.PBKDF2Encrypt("yxk980102"));
         let flag = CheckRequiredAll(loginParams, setErrorInput)
         if(flag){
-            let res = await interfaces.login(loginParams);
+            // 混淆加密算法
+            let pwd = common.confusionStr(common.PBKDF2Encrypt("yxk980102"));
+            const params = {...loginParams, password: pwd,}
+            let res = await interfaces.login(params);
             console.log(res);
             if(res && res.data.ErrorCode === 200){
                 console.log(res);
             }
+            getVerifyCode();
         }
     };
 
@@ -159,8 +173,8 @@ const LoginComponent = props => {
             </Grid>
                 
             <div className={loginless.smallBtnGroup}>
-                <Button onClick={()=>props.setLoginOrSignin()} className={loginless.smallBtnLeft} size="small" color="primary">没有账号?点击注册</Button>
-                <Button className={loginless.smallBtnRight} size="small" color="primary">忘了密码</Button>
+                <Button onClick={()=>setLoginType(2)} className={loginless.smallBtnLeft} size="small" color="primary">没有账号?点击注册</Button>
+                <Button onClick={()=>setLoginType(3)} className={loginless.smallBtnRight} size="small" color="primary">忘了密码</Button>
             </div>
             <Button className={loginless.button} onClick={login} size="large" variant="contained" color="primary">登录</Button>
         </>
@@ -170,13 +184,55 @@ const LoginComponent = props => {
 const SigninComponent = props => {
     const loginless = useStyles();
 
+    const [loginType, setLoginType] = useContext(LoginTypeContext);
+
     const [showPw, setShowPw] = useState(false);
     const [showCheckPw, setShowCheckPw] = useState(false);
 
     return (
         <>
-            <TextField className={loginless.input} size="small" label="手机号" variant="outlined" />
             <TextField className={loginless.input} size="small" label="用户名" variant="outlined" />
+            <TextField className={loginless.input} size="small" label="昵称" variant="outlined" />
+            <TextField className={loginless.input} size="small"
+                type={showPw?'text':'password'} label="密码" variant="outlined"
+                InputProps={{
+                    endAdornment: 
+                        <InputAdornment position="end">
+                            <IconButton onMouseDown={()=>setShowPw(!showPw)} onMouseUp={()=>setShowPw(!showPw)} aria-label="密码展示" edge="end"><Icon>visibility</Icon></IconButton>
+                        </InputAdornment>
+                }}
+            />
+            <TextField className={loginless.input} size="small"
+                type={showCheckPw?'text':'password'} label="确认密码" variant="outlined"
+                InputProps={{
+                    endAdornment: 
+                        <InputAdornment position="end">
+                            <IconButton onMouseDown={()=>setShowCheckPw(!showCheckPw)} onMouseUp={()=>setShowCheckPw(!showCheckPw)} aria-label="密码展示" edge="end"><Icon>visibility</Icon></IconButton>
+                        </InputAdornment>
+                    }}
+            />
+            <TextField className={loginless.input} size="small" label="验证码" variant="outlined" />
+            <TextField className={loginless.input} size="small" label="密保问题" variant="outlined" />
+            <div className={loginless.smallBtnGroup}>
+                <Button onClick={()=>setLoginType(1)} className={loginless.smallBtnLeft} size="small" color="primary">{'< '}返回</Button>
+            </div>
+            <Button className={loginless.button} size="large" variant="contained" color="primary">注册</Button>
+        </>
+    );
+};
+
+const ForgetPwdComponent = props => {
+    const loginless = useStyles();
+
+    const [loginType, setLoginType] = useContext(LoginTypeContext);
+
+    const [showPw, setShowPw] = useState(false);
+    const [showCheckPw, setShowCheckPw] = useState(false);
+
+    return (
+        <>
+            <TextField className={loginless.input} size="small" label="用户名" variant="outlined" />
+            <TextField className={loginless.input} size="small" label="密保问题" variant="outlined" />
             <TextField className={loginless.input} size="small"
                 type={showPw?'text':'password'} label="密码" variant="outlined"
                 InputProps={{
@@ -197,9 +253,9 @@ const SigninComponent = props => {
             />
             <TextField className={loginless.input} size="small" label="验证码" variant="outlined" />
             <div className={loginless.smallBtnGroup}>
-                <Button onClick={()=>props.setLoginOrSignin()} className={loginless.smallBtnLeft} size="small" color="primary">{'< '}返回</Button>
+                <Button onClick={()=>setLoginType(1)} className={loginless.smallBtnLeft} size="small" color="primary">{'< '}返回</Button>
             </div>
-            <Button className={loginless.button} size="large" variant="contained" color="primary">注册</Button>
+            <Button className={loginless.button} size="large" variant="contained" color="primary">修改</Button>
         </>
     );
 };
@@ -278,7 +334,7 @@ const useStyles = makeStyles( theme => ({
     form: {
         margin: '5% 0',
         padding: '20px',
-        minHeight: '500px',
+        minHeight: '540px',
         maxWidth: '460px',
         backgroundColor: 'rgba(255,255,255,.3)',
         borderRadius: '10px',
