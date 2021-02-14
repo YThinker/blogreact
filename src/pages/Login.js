@@ -134,8 +134,11 @@ const LoginComponent = props => {
     // 输入校验
     const [errorInput, setErrorInput] = useState({
         userId: false,
+        userIdHelperText: '请输入用户名',
         password: false,
+        passwordHelperText: '请输入密码',
         verifyCode: false,
+        verifyCodeHelperText: '请输入验证码',
     });
     const validateInput = (e) => CheckRequiredAll({[e.target.name]:e.target.value}, setErrorInput);
 
@@ -143,26 +146,26 @@ const LoginComponent = props => {
         <>
             <TextField className={loginless.input} size="small"
                 name="userId" required
-                label="用户名" variant="outlined" helperText="请输入用户名"
+                label="用户名" variant="outlined" helperText={errorInput.userIdHelperText}
                 onChange={handleChange} value={loginParams.userId}
                 onBlur={validateInput} error={errorInput.userId}
             />
             <TextField className={loginless.input} size="small"
                 name="password" required type={showPw?'text':'password'}
-                label="密码" variant="outlined" helperText="请输入密码"
+                label="密码" variant="outlined" helperText={errorInput.passwordHelperText}
                 onChange={handleChange} value={loginParams.password}
                 onBlur={validateInput} error={errorInput.password}
                 InputProps={{
                     endAdornment: 
                         <InputAdornment position="end">
-                            <IconButton onMouseDown={()=>setShowPw(!showPw)} onMouseUp={()=>setShowPw(!showPw)} aria-label="密码展示" edge="end"><Icon>visibility</Icon></IconButton>
+                            <IconButton onTouchStart={()=>setShowPw(!showPw)} onMouseDown={()=>setShowPw(!showPw)} onTouchEnd={()=>setShowPw(!showPw)} onMouseUp={()=>setShowPw(!showPw)} aria-label="密码展示" edge="end"><Icon>visibility</Icon></IconButton>
                         </InputAdornment>
                 }}
             />
             <Grid container item wrap="nowrap">
                 <TextField className={loginless.input} size="small"
                     name="verifyCode" required
-                    label="验证码" variant="outlined" helperText="请输入验证码"
+                    label="验证码" variant="outlined" helperText={errorInput.verifyCodeHelperText}
                     onChange={handleChange} value={loginParams.verifyCode}
                     onBlur={validateInput} error={errorInput.verifyCode}
                 />
@@ -189,30 +192,107 @@ const SigninComponent = props => {
     const [showPw, setShowPw] = useState(false);
     const [showCheckPw, setShowCheckPw] = useState(false);
 
+    const refreshSecret = () => {
+        let secretHead = common.randomString(5, true);
+        let secretFoot = common.randomString(5, true);
+        return (secretHead+Date.now()+secretFoot).slice(20);
+    }
+    const [verifyCodeUrl, setVerifyCodeUrl] = useState('');
+    const [getVerifyLoading, setGetVerifyLoading] = useState(false);
+    // 获取图片验证码
+    const getVerifyCode = async () => {
+        // 获取临时Auth存入session
+        let tempAuth = refreshSecret();
+        sessionStorage.setItem('verifyTempAuth', tempAuth.toString());
+        // 请求图片验证码
+        setGetVerifyLoading(true);
+        let res = await interfaces.getVerifyCode({verifySymbol: 2});
+        setGetVerifyLoading(false);
+        // 将验证码解密
+        if(res && res.data.ErrorCode === 200){
+            setVerifyCodeUrl(`data:image/svg+xml;base64,${common.Decrypt(res.data.data.imgData)}`);
+        }
+    };
+    useEffect(() => {
+        getVerifyCode();
+    },[]);
+
+    const [errorInput, setErrorInput] = useState({
+        userId: false,
+        userIdHelperText: '请输入用户名',
+        nickName: false,
+        nickNameHelperText: '请输入昵称',
+        password: false,
+        passwordHelperText: '请输入密码',
+        repeatPwd: false,
+        repeatPwdHelperText: '请再次输入密码',
+        verifyCode: false,
+        verifyCodeHelperText: '请输入验证码',
+        question: false,
+        questionHelperText: '请输入密保问题',
+        answer: false,
+        answerHelperText: '请输入密保答案',
+    });
+    const validateInput = (e) => CheckRequiredAll({[e.target.name]:e.target.value}, setErrorInput);
+
     return (
         <>
-            <TextField className={loginless.input} size="small" label="用户名" variant="outlined" />
-            <TextField className={loginless.input} size="small" label="昵称" variant="outlined" />
             <TextField className={loginless.input} size="small"
+                name="userId" required helperText={errorInput.userIdHelperText}
+                label="用户名" variant="outlined"
+                onBlur={validateInput} error={errorInput.userId}
+            />
+            <TextField className={loginless.input} size="small"
+                name="nickName" required helperText={errorInput.nickNameHelperText}
+                label="昵称" variant="outlined"
+                onBlur={validateInput} error={errorInput.nickName}
+            />
+            <TextField className={loginless.input} size="small"
+                name="password" required helperText={errorInput.passwordHelperText}
                 type={showPw?'text':'password'} label="密码" variant="outlined"
+                onBlur={validateInput} error={errorInput.password}
                 InputProps={{
                     endAdornment: 
                         <InputAdornment position="end">
-                            <IconButton onMouseDown={()=>setShowPw(!showPw)} onMouseUp={()=>setShowPw(!showPw)} aria-label="密码展示" edge="end"><Icon>visibility</Icon></IconButton>
+                            <IconButton onTouchStart={()=>setShowPw(!showPw)} onMouseDown={()=>setShowPw(!showPw)} onTouchEnd={()=>setShowPw(!showPw)} onMouseUp={()=>setShowPw(!showPw)} aria-label="密码展示" edge="end"><Icon>visibility</Icon></IconButton>
                         </InputAdornment>
                 }}
             />
             <TextField className={loginless.input} size="small"
+                name="repeatPwd" required helperText={errorInput.repeatPwdHelperText}
                 type={showCheckPw?'text':'password'} label="确认密码" variant="outlined"
+                onBlur={validateInput} error={errorInput.repeatPwd}
                 InputProps={{
                     endAdornment: 
                         <InputAdornment position="end">
-                            <IconButton onMouseDown={()=>setShowCheckPw(!showCheckPw)} onMouseUp={()=>setShowCheckPw(!showCheckPw)} aria-label="密码展示" edge="end"><Icon>visibility</Icon></IconButton>
+                            <IconButton onTouchStart={()=>setShowPw(!showPw)} onMouseDown={()=>setShowPw(!showPw)} onTouchEnd={()=>setShowPw(!showPw)} onMouseUp={()=>setShowPw(!showPw)} aria-label="密码展示" edge="end"><Icon>visibility</Icon></IconButton>
                         </InputAdornment>
                     }}
             />
-            <TextField className={loginless.input} size="small" label="验证码" variant="outlined" />
-            <TextField className={loginless.input} size="small" label="密保问题" variant="outlined" />
+            <Grid container item wrap="nowrap">
+                <TextField className={loginless.input} size="small"
+                    name="verifyCode" required
+                    label="验证码" variant="outlined" helperText={errorInput.verifyCodeHelperText}
+                    onBlur={validateInput} error={errorInput.verifyCode}
+                />
+                <div className={loginless.verifyImg}>
+                    <div className={loginless.progressShade} style={{display: getVerifyLoading ? '' : 'none'}}><CircularProgress size={24}/></div>
+                    <img src={verifyCodeUrl} onClick={getVerifyCode} alt="验证码"/>
+                </div>
+            </Grid>
+            <Grid container item wrap="nowrap" alignItems="center">
+                <TextField className={loginless.input} size="small"
+                    name="question" required helperText={errorInput.questionHelperText}
+                    label="密保问题" variant="outlined"
+                    onBlur={validateInput} error={errorInput.question}
+                />
+                <Typography variant="body1" component="span" style={{margin: '-16px 5px 0 5px', fontWeight: 'bold'}}>:</Typography>
+                <TextField className={loginless.input} size="small"
+                    name="answer" required helperText={errorInput.answerHelperText}
+                    label="密保答案" variant="outlined"
+                    onBlur={validateInput} error={errorInput.answer}
+                />
+            </Grid>
             <div className={loginless.smallBtnGroup}>
                 <Button onClick={()=>setLoginType(1)} className={loginless.smallBtnLeft} size="small" color="primary">{'< '}返回</Button>
             </div>
@@ -238,7 +318,7 @@ const ForgetPwdComponent = props => {
                 InputProps={{
                     endAdornment: 
                         <InputAdornment position="end">
-                            <IconButton onMouseDown={()=>setShowPw(!showPw)} onMouseUp={()=>setShowPw(!showPw)} aria-label="密码展示" edge="end"><Icon>visibility</Icon></IconButton>
+                            <IconButton onTouchStart={()=>setShowPw(!showPw)} onMouseDown={()=>setShowPw(!showPw)} onTouchEnd={()=>setShowPw(!showPw)} onMouseUp={()=>setShowPw(!showPw)} aria-label="密码展示" edge="end"><Icon>visibility</Icon></IconButton>
                         </InputAdornment>
                 }}
             />
@@ -247,7 +327,7 @@ const ForgetPwdComponent = props => {
                 InputProps={{
                     endAdornment: 
                         <InputAdornment position="end">
-                            <IconButton onMouseDown={()=>setShowCheckPw(!showCheckPw)} onMouseUp={()=>setShowCheckPw(!showCheckPw)} aria-label="密码展示" edge="end"><Icon>visibility</Icon></IconButton>
+                            <IconButton onTouchStart={()=>setShowPw(!showPw)} onMouseDown={()=>setShowPw(!showPw)} onTouchEnd={()=>setShowPw(!showPw)} onMouseUp={()=>setShowPw(!showPw)} aria-label="密码展示" edge="end"><Icon>visibility</Icon></IconButton>
                         </InputAdornment>
                     }}
             />
@@ -296,13 +376,13 @@ const useStyles = makeStyles( theme => ({
         padding: '0 20px',
     },
     input: {
-        marginTop: '20px',
+        marginTop: '8px',
         width: '100%',
     },
     verifyImg: {
         minWidth: '95px',
         height: '38px',
-        margin: '20px 0 0 10px',
+        margin: '8px 0 0 10px',
         borderRadius: '2px',
         position: 'relative',
         backgroundColor: '#dbd0b1',
@@ -324,17 +404,17 @@ const useStyles = makeStyles( theme => ({
         width: '100%'
     },
     button: {
-        marginTop: '16px',
+        marginTop: '8px',
     },
     smallBtnGroup: {
         display: 'flex',
         justifyContent: 'space-between',
-        marginTop: '8px',
+        marginTop: '4px',
     },
     form: {
         margin: '5% 0',
         padding: '20px',
-        minHeight: '540px',
+        minHeight: '600px',
         maxWidth: '460px',
         backgroundColor: 'rgba(255,255,255,.3)',
         borderRadius: '10px',
