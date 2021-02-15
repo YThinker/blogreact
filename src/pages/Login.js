@@ -1,7 +1,7 @@
 import React, { useEffect, useState, createContext, useContext } from 'react';
 
 import { makeStyles } from '@material-ui/core';
-import { TextField, Grid, Typography, Button, Icon, IconButton, CircularProgress } from '@material-ui/core';
+import { TextField, Grid, Typography, Button, Icon, IconButton, Tooltip, CircularProgress } from '@material-ui/core';
 import { InputAdornment } from '@material-ui/core';
 import Slide from '@/assets/component/Slide'
 
@@ -63,7 +63,7 @@ const SwitchGrid = props => {
                 </Grid>
                 :loginType===2?
                 <Grid item className={loginless.formComponent}>
-                    <SigninComponent/>
+                    <RegisterComponent/>
                 </Grid>
                 :
                 <Grid item className={loginless.formComponent}>
@@ -96,7 +96,7 @@ const LoginComponent = props => {
         sessionStorage.setItem('verifyTempAuth', tempAuth.toString());
         // 请求图片验证码
         setGetVerifyLoading(true);
-        let res = await interfaces.getVerifyCode({verifySymbol: 1});
+        let res = await interfaces.getVerifyCode({verifySymbol: 1, verifyType: 'mathExpr'});
         setGetVerifyLoading(false);
         // 将验证码解密
         if(res && res.data.ErrorCode === 200){
@@ -120,7 +120,7 @@ const LoginComponent = props => {
         let flag = CheckRequiredAll(loginParams, setErrorInput)
         if(flag){
             // 混淆加密算法
-            let pwd = common.confusionStr(common.PBKDF2Encrypt("yxk980102"));
+            let pwd = common.confusionStr(common.PBKDF2Encrypt(loginParams.password));
             const params = {...loginParams, password: pwd,}
             let res = await interfaces.login(params);
             console.log(res);
@@ -158,7 +158,7 @@ const LoginComponent = props => {
                 InputProps={{
                     endAdornment: 
                         <InputAdornment position="end">
-                            <IconButton onTouchStart={()=>setShowPw(!showPw)} onMouseDown={()=>setShowPw(!showPw)} onTouchEnd={()=>setShowPw(!showPw)} onMouseUp={()=>setShowPw(!showPw)} aria-label="密码展示" edge="end"><Icon>visibility</Icon></IconButton>
+                            <IconButton className={loginless.iconButton} onTouchStart={()=>setShowPw(!showPw)} onMouseDown={()=>setShowPw(!showPw)} onTouchEnd={()=>setShowPw(!showPw)} onMouseUp={()=>setShowPw(!showPw)} aria-label="密码展示" edge="end"><Icon className={loginless.icon}>visibility</Icon></IconButton>
                         </InputAdornment>
                 }}
             />
@@ -184,7 +184,7 @@ const LoginComponent = props => {
     );
 };
 
-const SigninComponent = props => {
+const RegisterComponent = props => {
     const loginless = useStyles();
 
     const [loginType, setLoginType] = useContext(LoginTypeContext);
@@ -217,6 +217,31 @@ const SigninComponent = props => {
         getVerifyCode();
     },[]);
 
+    const [registerParams, setRegisterParams] = useState({
+        userId: '',
+        nickName: '',
+        password: '',
+        repeatPwd: '',
+        verifyCode: '',
+        question: '',
+        answer: '',
+    });
+    const handleChange = (e) => ChangeVal(e, setRegisterParams);
+    const register = async () => {
+        let flag = CheckRequiredAll(registerParams, setErrorInput)
+        if(flag) {
+            let {repeatPwd, ...params} = registerParams;
+            params.password = common.confusionStr(common.PBKDF2Encrypt(registerParams.password));
+            params.answer = common.confusionStr(common.PBKDF2Encrypt(registerParams.answer));
+            console.log('registerParams:',params);
+            let res = await interfaces.register(params);
+            console.log(res);
+            if(res && res.data.ErrorCode === 200){
+                
+            }
+        }
+    };
+
     const [errorInput, setErrorInput] = useState({
         userId: false,
         userIdHelperText: '请输入用户名',
@@ -234,38 +259,67 @@ const SigninComponent = props => {
         answerHelperText: '请输入密保答案',
     });
     const validateInput = (e) => CheckRequiredAll({[e.target.name]:e.target.value}, setErrorInput);
+    const validateRegisted = async (e, type) => {
+        const typeCN = type==='nickName'?'昵称':'用户名'
+        let notNull = CheckRequiredAll({[e.target.name]:e.target.value}, setErrorInput);
+        setErrorInput(prevState => ({...prevState, [`${e.target.name}HelperText`]: `请输入${typeCN}`}));
+        if(notNull){
+            const params = {type: type, content: e.target.value};
+            let res = await interfaces.validateRegisted(params);
+            if(res && res.data.ErrorCode !== 200){
+                setErrorInput(prevState => ({...prevState, [e.target.name]: true, [`${e.target.name}HelperText`]: `该${typeCN}已被注册`}));
+            } else {
+                setErrorInput(prevState => ({...prevState, [e.target.name]: false, [`${e.target.name}HelperText`]: `请输入${typeCN}`}));
+            }
+        }
+    };
+    const validateRepeatPwd = (e) => {
+        let notNull = CheckRequiredAll({[e.target.name]:e.target.value}, setErrorInput);
+        setErrorInput(prevState => ({...prevState, repeatPwdHelperText: '请再次输入密码'}));
+        if(notNull){
+            if(registerParams.password !== registerParams.repeatPwd){
+                setErrorInput(prevState => ({...prevState, repeatPwd: true, repeatPwdHelperText: `两次输入的密码不一致`}));
+            } else {
+                setErrorInput(prevState => ({...prevState, repeatPwd: false, repeatPwdHelperText: '请再次输入密码'}));
+            }
+        }
+    };
 
     return (
         <>
             <TextField className={loginless.input} size="small"
                 name="userId" required helperText={errorInput.userIdHelperText}
                 label="用户名" variant="outlined"
-                onBlur={validateInput} error={errorInput.userId}
+                onChange={handleChange} value={registerParams.userId}
+                onBlur={(e) => validateRegisted(e,'userId')} error={errorInput.userId}
             />
             <TextField className={loginless.input} size="small"
                 name="nickName" required helperText={errorInput.nickNameHelperText}
                 label="昵称" variant="outlined"
-                onBlur={validateInput} error={errorInput.nickName}
+                onChange={handleChange} value={registerParams.nickName}
+                onBlur={(e) => validateRegisted(e,'nickName')} error={errorInput.nickName}
             />
             <TextField className={loginless.input} size="small"
                 name="password" required helperText={errorInput.passwordHelperText}
                 type={showPw?'text':'password'} label="密码" variant="outlined"
-                onBlur={validateInput} error={errorInput.password}
+                onChange={handleChange} value={registerParams.password}
+                onBlur={validateRepeatPwd} error={errorInput.password}
                 InputProps={{
                     endAdornment: 
                         <InputAdornment position="end">
-                            <IconButton onTouchStart={()=>setShowPw(!showPw)} onMouseDown={()=>setShowPw(!showPw)} onTouchEnd={()=>setShowPw(!showPw)} onMouseUp={()=>setShowPw(!showPw)} aria-label="密码展示" edge="end"><Icon>visibility</Icon></IconButton>
+                            <IconButton className={loginless.iconButton} onTouchStart={()=>setShowPw(!showPw)} onMouseDown={()=>setShowPw(!showPw)} onTouchEnd={()=>setShowPw(!showPw)} onMouseUp={()=>setShowPw(!showPw)} aria-label="密码展示" edge="end"><Icon className={loginless.icon}>visibility</Icon></IconButton>
                         </InputAdornment>
                 }}
             />
             <TextField className={loginless.input} size="small"
                 name="repeatPwd" required helperText={errorInput.repeatPwdHelperText}
                 type={showCheckPw?'text':'password'} label="确认密码" variant="outlined"
-                onBlur={validateInput} error={errorInput.repeatPwd}
+                onChange={handleChange} value={registerParams.repeatPwd}
+                onBlur={validateRepeatPwd} error={errorInput.repeatPwd}
                 InputProps={{
                     endAdornment: 
                         <InputAdornment position="end">
-                            <IconButton onTouchStart={()=>setShowPw(!showPw)} onMouseDown={()=>setShowPw(!showPw)} onTouchEnd={()=>setShowPw(!showPw)} onMouseUp={()=>setShowPw(!showPw)} aria-label="密码展示" edge="end"><Icon>visibility</Icon></IconButton>
+                            <IconButton className={loginless.iconButton} onTouchStart={()=>setShowCheckPw(!showCheckPw)} onMouseDown={()=>setShowCheckPw(!showCheckPw)} onTouchEnd={()=>setShowCheckPw(!showCheckPw)} onMouseUp={()=>setShowCheckPw(!showCheckPw)} aria-label="确认密码展示" edge="end"><Icon className={loginless.icon}>visibility</Icon></IconButton>
                         </InputAdornment>
                     }}
             />
@@ -273,6 +327,7 @@ const SigninComponent = props => {
                 <TextField className={loginless.input} size="small"
                     name="verifyCode" required
                     label="验证码" variant="outlined" helperText={errorInput.verifyCodeHelperText}
+                    onChange={handleChange} value={registerParams.verifyCode}
                     onBlur={validateInput} error={errorInput.verifyCode}
                 />
                 <div className={loginless.verifyImg}>
@@ -284,19 +339,29 @@ const SigninComponent = props => {
                 <TextField className={loginless.input} size="small"
                     name="question" required helperText={errorInput.questionHelperText}
                     label="密保问题" variant="outlined"
+                    onChange={handleChange} value={registerParams.question}
                     onBlur={validateInput} error={errorInput.question}
                 />
                 <Typography variant="body1" component="span" style={{margin: '-16px 5px 0 5px', fontWeight: 'bold'}}>:</Typography>
                 <TextField className={loginless.input} size="small"
                     name="answer" required helperText={errorInput.answerHelperText}
                     label="密保答案" variant="outlined"
+                    onChange={handleChange} value={registerParams.answer}
                     onBlur={validateInput} error={errorInput.answer}
+                    InputProps={{
+                        endAdornment: 
+                            <InputAdornment position="end">
+                                <Tooltip disableFocusListener title="请确保你的密保问题足够安全">
+                                    <IconButton className={loginless.iconButton} className={loginless.iconButton} aria-label="请确保你的密保问题足够安全" edge="end"><Icon className={loginless.icon}>error</Icon></IconButton>
+                                </Tooltip>
+                            </InputAdornment>
+                    }}
                 />
             </Grid>
             <div className={loginless.smallBtnGroup}>
                 <Button onClick={()=>setLoginType(1)} className={loginless.smallBtnLeft} size="small" color="primary">{'< '}返回</Button>
             </div>
-            <Button className={loginless.button} size="large" variant="contained" color="primary">注册</Button>
+            <Button onClick={register} className={loginless.button} size="large" variant="contained" color="primary">注册</Button>
         </>
     );
 };
@@ -318,7 +383,7 @@ const ForgetPwdComponent = props => {
                 InputProps={{
                     endAdornment: 
                         <InputAdornment position="end">
-                            <IconButton onTouchStart={()=>setShowPw(!showPw)} onMouseDown={()=>setShowPw(!showPw)} onTouchEnd={()=>setShowPw(!showPw)} onMouseUp={()=>setShowPw(!showPw)} aria-label="密码展示" edge="end"><Icon>visibility</Icon></IconButton>
+                            <IconButton className={loginless.iconButton} onTouchStart={()=>setShowPw(!showPw)} onMouseDown={()=>setShowPw(!showPw)} onTouchEnd={()=>setShowPw(!showPw)} onMouseUp={()=>setShowPw(!showPw)} aria-label="密码展示" edge="end"><Icon className={loginless.icon}>visibility</Icon></IconButton>
                         </InputAdornment>
                 }}
             />
@@ -327,7 +392,7 @@ const ForgetPwdComponent = props => {
                 InputProps={{
                     endAdornment: 
                         <InputAdornment position="end">
-                            <IconButton onTouchStart={()=>setShowPw(!showPw)} onMouseDown={()=>setShowPw(!showPw)} onTouchEnd={()=>setShowPw(!showPw)} onMouseUp={()=>setShowPw(!showPw)} aria-label="密码展示" edge="end"><Icon>visibility</Icon></IconButton>
+                            <IconButton className={loginless.iconButton} onTouchStart={()=>setShowPw(!showPw)} onMouseDown={()=>setShowPw(!showPw)} onTouchEnd={()=>setShowPw(!showPw)} onMouseUp={()=>setShowPw(!showPw)} aria-label="密码展示" edge="end"><Icon className={loginless.icon}>visibility</Icon></IconButton>
                         </InputAdornment>
                     }}
             />
@@ -405,6 +470,12 @@ const useStyles = makeStyles( theme => ({
     },
     button: {
         marginTop: '8px',
+    },
+    iconButton: {
+        padding: '6px',
+    },
+    icon: {
+        fontSize: '1.2rem',
     },
     smallBtnGroup: {
         display: 'flex',

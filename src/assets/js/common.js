@@ -17,7 +17,7 @@ export default {
 
     // 随机字符串
     randomString(len=20, isNum=false) {
-        const str = "Aa1BbCcDdE2eFfGgHh3IiJj4KkLlMmNnOo5PpQqRrSs0T6tUuVv7WwXxY8yZz9";
+        const str = "1Aa1Bb2CcDdE2eFf3GgHh3Ii4Jj4KkLl5MmN9nOo5PpQq6RrSs0T6tUu7Vv7WwXx8Y8yZz9";
         const strLen = str.length;
         let secret = '';
         for( let i = 0; i < len; i++ ){
@@ -55,7 +55,6 @@ export default {
 
     // 头尾增加随机len位数字符串混淆
     confusionStr(str, len=10) {
-        console.log(this.randomString(len)+str+this.randomString(len));
         return this.randomString(len)+str+this.randomString(len);
     },
 };
