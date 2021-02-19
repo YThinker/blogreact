@@ -392,7 +392,7 @@ const ForgetPwdComponent = props => {
                 InputProps={{
                     endAdornment: 
                         <InputAdornment position="end">
-                            <IconButton className={loginless.iconButton} onTouchStart={()=>setShowPw(!showPw)} onMouseDown={()=>setShowPw(!showPw)} onTouchEnd={()=>setShowPw(!showPw)} onMouseUp={()=>setShowPw(!showPw)} aria-label="密码展示" edge="end"><Icon className={loginless.icon}>visibility</Icon></IconButton>
+                            <IconButton className={loginless.iconButton} onTouchStart={()=>setShowCheckPw(!showCheckPw)} onMouseDown={()=>setShowCheckPw(!showCheckPw)} onTouchEnd={()=>setShowCheckPw(!showCheckPw)} onMouseUp={()=>setShowCheckPw(!showCheckPw)} aria-label="密码展示" edge="end"><Icon className={loginless.icon}>visibility</Icon></IconButton>
                         </InputAdornment>
                     }}
             />
