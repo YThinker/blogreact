@@ -1,8 +1,8 @@
-import React, { useEffect, useState, createContext, useContext } from 'react';
+import React, { useEffect, useState, createContext, useContext, useRef } from 'react';
 
 import { makeStyles } from '@material-ui/core';
 import { TextField, Grid, Typography, Button, Icon, IconButton, Tooltip, CircularProgress } from '@material-ui/core';
-import { InputAdornment } from '@material-ui/core';
+import { InputAdornment, Collapse } from '@material-ui/core';
 import Slide from '@/assets/component/Slide'
 
 import common from '@/assets/js/common'
@@ -259,45 +259,53 @@ const RegisterComponent = props => {
         answerHelperText: '请输入密保答案',
     });
     const validateInput = (e) => CheckRequiredAll({[e.target.name]:e.target.value}, setErrorInput);
+    const userId = useRef(); const nickName = useRef();
+    useEffect(() => {
+        userId.current.addEventListener('change', (e)=>{
+            validateRegisted(e,'userId');
+        });
+        nickName.current.addEventListener('change', (e)=>{
+            validateRegisted(e,'nickName');
+        });
+    },[]);
     const validateRegisted = async (e, type) => {
         const typeCN = type==='nickName'?'昵称':'用户名'
         let notNull = CheckRequiredAll({[e.target.name]:e.target.value}, setErrorInput);
-        setErrorInput(prevState => ({...prevState, [`${e.target.name}HelperText`]: `请输入${typeCN}`}));
         if(notNull){
             const params = {type: type, content: e.target.value};
+            setErrorInput(prevState => ({...prevState, [`${e.target.name}HelperText`]: `校验中...`}));
             let res = await interfaces.validateRegisted(params);
             if(res && res.data.ErrorCode !== 200){
                 setErrorInput(prevState => ({...prevState, [e.target.name]: true, [`${e.target.name}HelperText`]: `该${typeCN}已被注册`}));
             } else {
                 setErrorInput(prevState => ({...prevState, [e.target.name]: false, [`${e.target.name}HelperText`]: `请输入${typeCN}`}));
             }
-        }
+        } else setErrorInput(prevState => ({...prevState, [`${e.target.name}HelperText`]: `请输入${typeCN}`}));
     };
     const validateRepeatPwd = (e) => {
         let notNull = CheckRequiredAll({[e.target.name]:e.target.value}, setErrorInput);
-        setErrorInput(prevState => ({...prevState, repeatPwdHelperText: '请再次输入密码'}));
         if(notNull){
             if(registerParams.password !== registerParams.repeatPwd){
                 setErrorInput(prevState => ({...prevState, repeatPwd: true, repeatPwdHelperText: `两次输入的密码不一致`}));
             } else {
                 setErrorInput(prevState => ({...prevState, repeatPwd: false, repeatPwdHelperText: '请再次输入密码'}));
             }
-        }
+        } else setErrorInput(prevState => ({...prevState, repeatPwdHelperText: '请再次输入密码'}));
     };
 
     return (
         <>
-            <TextField className={loginless.input} size="small"
+            <TextField className={loginless.input} size="small" ref={userId}
                 name="userId" required helperText={errorInput.userIdHelperText}
                 label="用户名" variant="outlined"
                 onChange={handleChange} value={registerParams.userId}
-                onBlur={(e) => validateRegisted(e,'userId')} error={errorInput.userId}
+                error={errorInput.userId}
             />
-            <TextField className={loginless.input} size="small"
+            <TextField className={loginless.input} size="small" ref={nickName}
                 name="nickName" required helperText={errorInput.nickNameHelperText}
                 label="昵称" variant="outlined"
                 onChange={handleChange} value={registerParams.nickName}
-                onBlur={(e) => validateRegisted(e,'nickName')} error={errorInput.nickName}
+                error={errorInput.nickName}
             />
             <TextField className={loginless.input} size="small"
                 name="password" required helperText={errorInput.passwordHelperText}
@@ -374,33 +382,147 @@ const ForgetPwdComponent = props => {
     const [showPw, setShowPw] = useState(false);
     const [showCheckPw, setShowCheckPw] = useState(false);
 
+    const refreshSecret = () => {
+        let secretHead = common.randomString(5, true);
+        let secretFoot = common.randomString(5, true);
+        return (secretHead+Date.now()+secretFoot).slice(20);
+    }
+    const [verifyCodeUrl, setVerifyCodeUrl] = useState('');
+    const [getVerifyLoading, setGetVerifyLoading] = useState(false);
+    // 获取图片验证码
+    const getVerifyCode = async () => {
+        // 获取临时Auth存入session
+        let tempAuth = refreshSecret();
+        sessionStorage.setItem('verifyTempAuth', tempAuth.toString());
+        // 请求图片验证码
+        setGetVerifyLoading(true);
+        let res = await interfaces.getVerifyCode({verifySymbol: 3});
+        setGetVerifyLoading(false);
+        // 将验证码解密
+        if(res && res.data.ErrorCode === 200){
+            setVerifyCodeUrl(`data:image/svg+xml;base64,${common.Decrypt(res.data.data.imgData)}`);
+        }
+    };
+    useEffect(() => {
+        getVerifyCode();
+    },[]);
+
+    const [forgetPwdParams, setForgetPwdParams] = useState({
+        userId: '',
+        password: '',
+        repeatPwd: '',
+        question: '',
+        answer: '',
+        verifyCode: '',
+    });
+    const handleChange = (e) => ChangeVal(e, setForgetPwdParams);
+
+    const [errorInput, setErrorInput] = useState({
+        userId: false,
+        userIdHelperText: '请输入用户名',
+        password: false,
+        passwordHelperText: '请输入密码',
+        repeatPwd: false,
+        repeatPwdHelperText: '请再次输入密码',
+        answer: false,
+        answerHelperText: '请输入密保答案',
+        verifyCode: false,
+        verifyCodeHelperText: '请输入验证码',
+    });
+    const validateInput = (e) => CheckRequiredAll({[e.target.name]:e.target.value}, setErrorInput);
+    const userId = useRef();
+    useEffect(async () => {
+        userId.current.addEventListener('change', (e) => {
+            validateUserId(e);
+        });
+    },[]);
+    const validateUserId = async (e) => {
+        let notNull = CheckRequiredAll({[e.target.name]:e.target.value}, setErrorInput);
+        if(notNull){
+            const params = {userId: e.target.value};
+            setErrorInput(prevState => ({...prevState, userIdHelperText: `校验中...`}));
+            let res = await interfaces.getSecurityQuestion(params);
+            if(res && res.data.ErrorCode === 200){
+                setForgetPwdParams(prevState => ({...prevState, question: res.data.data.question}));
+                setErrorInput(prevState => ({...prevState, userIdHelperText: '请输入用户名'}));
+            } else {
+                setErrorInput(prevState => ({...prevState, userId: true, userIdHelperText: `该用户不存在`}));
+                setForgetPwdParams(prevState => ({...prevState, question: ''}));
+            }
+        } else {
+            setForgetPwdParams(prevState => ({...prevState, question: ''}));
+            setErrorInput(prevState => ({...prevState, userIdHelperText: '请输入用户名'}));
+        }
+    }
+    const validateRepeatPwd = (e) => {
+        let notNull = CheckRequiredAll({[e.target.name]:e.target.value}, setErrorInput);
+        if(notNull){
+            if(forgetPwdParams.password !== forgetPwdParams.repeatPwd){
+                setErrorInput(prevState => ({...prevState, repeatPwd: true, repeatPwdHelperText: `两次输入的密码不一致`}));
+            } else {
+                setErrorInput(prevState => ({...prevState, repeatPwd: false, repeatPwdHelperText: '请再次输入密码'}));
+            }
+        } else setErrorInput(prevState => ({...prevState, repeatPwdHelperText: '请再次输入密码'}));
+    };
+
     return (
         <>
-            <TextField className={loginless.input} size="small" label="用户名" variant="outlined" />
-            <TextField className={loginless.input} size="small" label="密保问题" variant="outlined" />
-            <TextField className={loginless.input} size="small"
-                type={showPw?'text':'password'} label="密码" variant="outlined"
-                InputProps={{
-                    endAdornment: 
-                        <InputAdornment position="end">
-                            <IconButton className={loginless.iconButton} onTouchStart={()=>setShowPw(!showPw)} onMouseDown={()=>setShowPw(!showPw)} onTouchEnd={()=>setShowPw(!showPw)} onMouseUp={()=>setShowPw(!showPw)} aria-label="密码展示" edge="end"><Icon className={loginless.icon}>visibility</Icon></IconButton>
-                        </InputAdornment>
-                }}
+            <TextField className={loginless.input} size="small" ref={userId}
+                name="userId" required
+                label="用户名" variant="outlined" helperText={errorInput.userIdHelperText}
+                onChange={handleChange} value={forgetPwdParams.userId}
+                error={errorInput.userId}
             />
-            <TextField className={loginless.input} size="small"
-                type={showCheckPw?'text':'password'} label="确认密码" variant="outlined"
-                InputProps={{
-                    endAdornment: 
-                        <InputAdornment position="end">
-                            <IconButton className={loginless.iconButton} onTouchStart={()=>setShowCheckPw(!showCheckPw)} onMouseDown={()=>setShowCheckPw(!showCheckPw)} onTouchEnd={()=>setShowCheckPw(!showCheckPw)} onMouseUp={()=>setShowCheckPw(!showCheckPw)} aria-label="密码展示" edge="end"><Icon className={loginless.icon}>visibility</Icon></IconButton>
-                        </InputAdornment>
+            <Collapse in={forgetPwdParams.question}>
+                <TextField className={loginless.input} size="small"
+                    type={showPw?'text':'password'} label="密码" variant="outlined"
+                    name="password" required helperText={errorInput.passwordHelperText}
+                    onChange={handleChange} value={forgetPwdParams.password}
+                    onBlur={validateRepeatPwd} error={errorInput.password}
+                    InputProps={{
+                        endAdornment: 
+                            <InputAdornment position="end">
+                                <IconButton className={loginless.iconButton} onTouchStart={()=>setShowPw(!showPw)} onMouseDown={()=>setShowPw(!showPw)} onTouchEnd={()=>setShowPw(!showPw)} onMouseUp={()=>setShowPw(!showPw)} aria-label="密码展示" edge="end"><Icon className={loginless.icon}>visibility</Icon></IconButton>
+                            </InputAdornment>
                     }}
-            />
-            <TextField className={loginless.input} size="small" label="验证码" variant="outlined" />
+                />
+                <TextField className={loginless.input} size="small"
+                    type={showCheckPw?'text':'password'} label="确认密码" variant="outlined"
+                    name="repeatPwd" required helperText={errorInput.repeatPwdHelperText}
+                    onChange={handleChange} value={forgetPwdParams.repeatPwd}
+                    onBlur={validateRepeatPwd} error={errorInput.repeatPwd}
+                    InputProps={{
+                        endAdornment: 
+                            <InputAdornment position="end">
+                                <IconButton className={loginless.iconButton} onTouchStart={()=>setShowCheckPw(!showCheckPw)} onMouseDown={()=>setShowCheckPw(!showCheckPw)} onTouchEnd={()=>setShowCheckPw(!showCheckPw)} onMouseUp={()=>setShowCheckPw(!showCheckPw)} aria-label="密码展示" edge="end"><Icon className={loginless.icon}>visibility</Icon></IconButton>
+                            </InputAdornment>
+                        }}
+                />
+                <TextField className={loginless.input} size="small"
+                    name="answer" required helperText={errorInput.answerHelperText}
+                    label={'问:'+forgetPwdParams.question} variant="outlined"
+                    onChange={handleChange} value={forgetPwdParams.answer}
+                    onBlur={validateInput} error={errorInput.answer}
+                />
+                <Grid container item wrap="nowrap">
+                    <TextField className={loginless.input} size="small"
+                        name="verifyCode" required
+                        label="验证码" variant="outlined" helperText={errorInput.verifyCodeHelperText}
+                        onChange={handleChange} value={forgetPwdParams.verifyCode}
+                        onBlur={validateInput} error={errorInput.verifyCode}
+                    />
+                    <div className={loginless.verifyImg}>
+                        <div className={loginless.progressShade} style={{display: getVerifyLoading ? '' : 'none'}}><CircularProgress size={24}/></div>
+                        <img src={verifyCodeUrl} onClick={getVerifyCode} alt="验证码"/>
+                    </div>
+                </Grid>
+            </Collapse>
             <div className={loginless.smallBtnGroup}>
                 <Button onClick={()=>setLoginType(1)} className={loginless.smallBtnLeft} size="small" color="primary">{'< '}返回</Button>
             </div>
-            <Button className={loginless.button} size="large" variant="contained" color="primary">修改</Button>
+            <Collapse in={forgetPwdParams.question}>
+                <Button className={loginless.button} size="large" variant="contained" color="primary">修改</Button>
+            </Collapse>
         </>
     );
 };

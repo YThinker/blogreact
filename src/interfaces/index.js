@@ -26,4 +26,9 @@ export default {
         let actiontype = '/register';
         return fetch(actiontype, params);
     },
+    // 获取密保问题
+    async getSecurityQuestion(params) {
+        let actiontype = '/getSecurityQuestion';
+        return fetch(actiontype, params, 'GET');
+    },
 };
