@@ -3,7 +3,7 @@ import React, { useEffect, useState, createContext, useContext, useRef } from 'r
 import { makeStyles } from '@material-ui/core';
 import { TextField, Grid, Typography, Button, Icon, IconButton, Tooltip, CircularProgress } from '@material-ui/core';
 import { InputAdornment, Collapse } from '@material-ui/core';
-import Slide from '@/assets/component/Slide'
+import { Slide, alert } from '@/assets/component'
 
 import common from '@/assets/js/common'
 import interfaces from '@/interfaces/index';
@@ -125,9 +125,11 @@ const LoginComponent = props => {
             let res = await interfaces.login(params);
             console.log(res);
             if(res && res.data.ErrorCode === 200){
-                console.log(res);
+                localStorage.setItem('token', res.data.data.token);
+                window._reacthistory.push('/index');
+            } else {
+                getVerifyCode();
             }
-            getVerifyCode();
         }
     };
 
@@ -237,7 +239,8 @@ const RegisterComponent = props => {
             let res = await interfaces.register(params);
             console.log(res);
             if(res && res.data.ErrorCode === 200){
-                
+                localStorage.setItem('token', res.data.data.token);
+                window._reacthistory.push('/index');
             }
         }
     };
@@ -416,6 +419,20 @@ const ForgetPwdComponent = props => {
         verifyCode: '',
     });
     const handleChange = (e) => ChangeVal(e, setForgetPwdParams);
+    const changePwd = async () => {
+        let flag = CheckRequiredAll(forgetPwdParams, setErrorInput);
+        if(flag) {
+            let {repeatPwd, question, ...params} = forgetPwdParams;
+            params.password = common.confusionStr(common.PBKDF2Encrypt(forgetPwdParams.password));
+            params.answer = common.confusionStr(common.PBKDF2Encrypt(forgetPwdParams.answer));
+            let res = await interfaces.forgetPwd(params);
+            console.log(res);
+            if(res && res.data.ErrorCode === 200){
+                alert().open({ content: '修改成功！' });
+                setLoginType(1);
+            }
+        }
+    }
 
     const [errorInput, setErrorInput] = useState({
         userId: false,
@@ -473,9 +490,9 @@ const ForgetPwdComponent = props => {
                 onChange={handleChange} value={forgetPwdParams.userId}
                 error={errorInput.userId}
             />
-            <Collapse in={forgetPwdParams.question}>
+            <Collapse in={Boolean(forgetPwdParams.question)}>
                 <TextField className={loginless.input} size="small"
-                    type={showPw?'text':'password'} label="密码" variant="outlined"
+                    type={showPw?'text':'password'} label="新密码" variant="outlined"
                     name="password" required helperText={errorInput.passwordHelperText}
                     onChange={handleChange} value={forgetPwdParams.password}
                     onBlur={validateRepeatPwd} error={errorInput.password}
@@ -520,8 +537,8 @@ const ForgetPwdComponent = props => {
             <div className={loginless.smallBtnGroup}>
                 <Button onClick={()=>setLoginType(1)} className={loginless.smallBtnLeft} size="small" color="primary">{'< '}返回</Button>
             </div>
-            <Collapse in={forgetPwdParams.question}>
-                <Button className={loginless.button} size="large" variant="contained" color="primary">修改</Button>
+            <Collapse in={Boolean(forgetPwdParams.question)}>
+                <Button onClick={changePwd} className={loginless.button} size="large" variant="contained" color="primary">修改</Button>
             </Collapse>
         </>
     );

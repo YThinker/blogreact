@@ -31,4 +31,8 @@ export default {
         let actiontype = '/getSecurityQuestion';
         return fetch(actiontype, params, 'GET');
     },
+    async forgetPwd(params){
+        let actiontype = '/forgetPwd';
+        return fetch(actiontype, params);
+    },
 };
