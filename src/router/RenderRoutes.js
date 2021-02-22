@@ -1,11 +1,14 @@
 import React from "react";
 import { Switch, Route, Redirect } from "react-router";
 
+import store from "@/store/index";
+
 const loginPath = '/login';
 
 const RenderRoutes = (routes, extraProps = {}, switchProps = {}) =>
     {
-        let authed = localStorage.getItem('token');
+        let authed = store.getState().user.token;
+        console.log(authed);
         return routes ? (
             <Switch {...switchProps}>
                 <Redirect exact from="/" to="/index"></Redirect>
