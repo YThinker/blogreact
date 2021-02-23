@@ -15,10 +15,11 @@ function App() {
         if(token){
             store.dispatch({type: 'SET_TOKEN', token});
             let res = await interfaces.getUserInfoSecurity();
-            console.log(res);
             if(res && res.data.ErrorCode === 200){
-                store.dispatch({type: 'SET_USERINFO', userInfoSecurity: res.data.data.userInfoSecurity});
+                console.log(res.data.data);
+                store.dispatch({type: 'SET_USERINFO', userInfo: res.data.data});
             } else {
+                localStorage.removeItem('token');
                 store.dispatch({type: 'SET_TOKEN', token: ''});
             }
         }

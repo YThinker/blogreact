@@ -8,7 +8,6 @@ const loginPath = '/login';
 const RenderRoutes = (routes, extraProps = {}, switchProps = {}) =>
     {
         let authed = store.getState().user.token;
-        console.log(authed);
         return routes ? (
             <Switch {...switchProps}>
                 <Redirect exact from="/" to="/index"></Redirect>
