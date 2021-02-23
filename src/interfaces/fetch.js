@@ -1,6 +1,8 @@
 import axios from 'axios';
 import alert from '@/assets/component/alert';
 
+import store from "@/store/index";
+
 const url = 'http://127.0.0.1:7001';
 
 export default async function fetch() {
@@ -20,12 +22,15 @@ export default async function fetch() {
 }
 
 const _request = ( actiontype='', data={}, method='POST', responseType='' ) => {
+    let token = store.getState().user.token;
+
     return axios.request({
         url: `${url}${actiontype}`,
         method: method,
         headers: {
             "Content-Type": "application/json; charset=UTF-8",
             "TempAuth": sessionStorage.getItem("verifyTempAuth"),
+            "Authorization": `Bearer ${token}`,
         },
         data: data,
         params: method === 'GET' ? data : null,

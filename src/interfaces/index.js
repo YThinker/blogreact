@@ -31,8 +31,14 @@ export default {
         let actiontype = '/getSecurityQuestion';
         return fetch(actiontype, params, 'GET');
     },
+    // 忘记密码
     async forgetPwd(params){
         let actiontype = '/forgetPwd';
         return fetch(actiontype, params);
+    },
+    // 获取可公开用户信息
+    async getUserInfoSecurity(params){
+        let actiontype = '/getUserInfoSecurity';
+        return fetch(actiontype, params, 'GET');
     },
 };

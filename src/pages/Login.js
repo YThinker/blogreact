@@ -8,6 +8,8 @@ import { Slide, alert } from '@/assets/component'
 import common from '@/assets/js/common'
 import interfaces from '@/interfaces/index';
 
+import store from '@/store/index';
+
 import loginBg from '../assets/img/loginBg.png';
 
 const LoginTypeContext = createContext();
@@ -126,6 +128,8 @@ const LoginComponent = props => {
             console.log(res);
             if(res && res.data.ErrorCode === 200){
                 localStorage.setItem('token', res.data.data.token);
+                store.dispatch({type: 'SET_TOKEN', token: res.data.data.token});
+                store.dispatch({type: 'SET_USERINFO', userInfoSecurity: res.data.data.userInfoSecurity});
                 window._reacthistory.push('/index');
             } else {
                 getVerifyCode();
@@ -240,6 +244,8 @@ const RegisterComponent = props => {
             console.log(res);
             if(res && res.data.ErrorCode === 200){
                 localStorage.setItem('token', res.data.data.token);
+                store.dispatch({type: 'SET_TOKEN', token: res.data.data.token});
+                store.dispatch({type: 'SET_USERINFO', userInfoSecurity: res.data.data.userInfoSecurity});
                 window._reacthistory.push('/index');
             }
         }
