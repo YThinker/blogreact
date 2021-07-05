@@ -10,7 +10,8 @@ const RenderRoutes = (routes, extraProps = {}, switchProps = {}) =>
         let authed = store.getState().user.token || sessionStorage.getItem('token');
         return routes ? (
             <Switch {...switchProps}>
-                <Redirect exact from="/" to="/index"></Redirect>
+                <Redirect exact from="/" to="/index/home"></Redirect>
+                <Redirect exact from="/index" to="/index/home"></Redirect>
                 {routes.map((route, i) => (
                     <Route
                         key={route.key || i}

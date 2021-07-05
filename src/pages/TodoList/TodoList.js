@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useState } from 'react';
 import todolistless from './todolist.module.less';
 import inputModal from '../../assets/component/inputModal';
 import alert from '../../assets/component/alert';
@@ -25,11 +25,6 @@ function TodoList(props) {
             });
         }
     }
-
-    // const [queryContent] = useState(props.location.query.content);
-    // useEffect(() => {
-    //     handleInput(queryContent);
-    // },[queryContent]);
 
     return (
         <section className={todolistless.todolist}>

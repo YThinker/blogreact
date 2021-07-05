@@ -42,6 +42,7 @@ class Modal extends Component{
                 <div style={{...style,zIndex:'-1',}} onClick={()=>this.close()}></div>
                 <textarea className="textArea" type="text" onChange={(e)=>this.setState({value:e.target.value})} value={this.state.value}></textarea>
                 <button onClick={this.confirm}>确定</button>
+                <button onClick={this.close}>取消</button>
             </div>
         )
     }
