@@ -6,7 +6,7 @@ import { InputAdornment, Collapse } from '@material-ui/core';
 import { Slide, alert } from '@/assets/component'
 
 import common from '@/assets/js/common'
-import interfaces from '@/interfaces/index';
+import api from '@/api/index';
 
 import store from '@/store/index';
 
@@ -84,25 +84,16 @@ const LoginComponent = props => {
 
     const [loginType, setLoginType] = useContext(LoginTypeContext);
 
-    const refreshSecret = () => {
-        let secretHead = common.randomString(5, true);
-        let secretFoot = common.randomString(5, true);
-        return (secretHead+Date.now()+secretFoot).slice(20);
-    }
     const [verifyCodeUrl, setVerifyCodeUrl] = useState('');
     const [getVerifyLoading, setGetVerifyLoading] = useState(false);
     // 获取图片验证码
     const getVerifyCode = async () => {
-        // 获取临时Auth存入session
-        let tempAuth = refreshSecret();
-        sessionStorage.setItem('verifyTempAuth', tempAuth.toString());
-        // 请求图片验证码
         setGetVerifyLoading(true);
-        let res = await interfaces.getVerifyCode({verifySymbol: 1, verifyType: 'mathExpr'});
+        let res = await api.getVerifyCode();
         setGetVerifyLoading(false);
         // 将验证码解密
-        if(res && res.data.ErrorCode === 200){
-            setVerifyCodeUrl(`data:image/svg+xml;base64,${common.Decrypt(res.data.data.imgData)}`);
+        if(res?.data.errorCode === 0){
+            setVerifyCodeUrl(res.data.data);
         }
     };
     useEffect(() => {
@@ -124,7 +115,7 @@ const LoginComponent = props => {
             // 混淆加密算法
             let pwd = common.confusionStr(common.PBKDF2Encrypt(loginParams.password));
             const params = {...loginParams, password: pwd,}
-            let res = await interfaces.login(params);
+            let res = await api.login(params);
             console.log(res);
             if(res && res.data.ErrorCode === 200){
                 localStorage.setItem('token', res.data.data.token);
@@ -212,7 +203,7 @@ const RegisterComponent = props => {
         sessionStorage.setItem('verifyTempAuth', tempAuth.toString());
         // 请求图片验证码
         setGetVerifyLoading(true);
-        let res = await interfaces.getVerifyCode({verifySymbol: 2});
+        let res = await api.getVerifyCode({verifySymbol: 2});
         setGetVerifyLoading(false);
         // 将验证码解密
         if(res && res.data.ErrorCode === 200){
@@ -240,7 +231,7 @@ const RegisterComponent = props => {
             params.password = common.confusionStr(common.PBKDF2Encrypt(registerParams.password));
             params.answer = common.confusionStr(common.PBKDF2Encrypt(registerParams.answer));
             console.log('registerParams:',params);
-            let res = await interfaces.register(params);
+            let res = await api.register(params);
             console.log(res);
             if(res && res.data.ErrorCode === 200){
                 localStorage.setItem('token', res.data.data.token);
@@ -283,7 +274,7 @@ const RegisterComponent = props => {
         if(notNull){
             const params = {type: type, content: e.target.value};
             setErrorInput(prevState => ({...prevState, [`${e.target.name}HelperText`]: `校验中...`}));
-            let res = await interfaces.validateRegisted(params);
+            let res = await api.validateRegisted(params);
             if(res && res.data.ErrorCode !== 200){
                 setErrorInput(prevState => ({...prevState, [e.target.name]: true, [`${e.target.name}HelperText`]: `该${typeCN}已被注册`}));
             } else {
@@ -405,7 +396,7 @@ const ForgetPwdComponent = props => {
         sessionStorage.setItem('verifyTempAuth', tempAuth.toString());
         // 请求图片验证码
         setGetVerifyLoading(true);
-        let res = await interfaces.getVerifyCode({verifySymbol: 3});
+        let res = await api.getVerifyCode({verifySymbol: 3});
         setGetVerifyLoading(false);
         // 将验证码解密
         if(res && res.data.ErrorCode === 200){
@@ -431,7 +422,7 @@ const ForgetPwdComponent = props => {
             let {repeatPwd, question, ...params} = forgetPwdParams;
             params.password = common.confusionStr(common.PBKDF2Encrypt(forgetPwdParams.password));
             params.answer = common.confusionStr(common.PBKDF2Encrypt(forgetPwdParams.answer));
-            let res = await interfaces.forgetPwd(params);
+            let res = await api.forgetPwd(params);
             console.log(res);
             if(res && res.data.ErrorCode === 200){
                 alert().open({ content: '修改成功！' });
@@ -464,7 +455,7 @@ const ForgetPwdComponent = props => {
         if(notNull){
             const params = {userId: e.target.value};
             setErrorInput(prevState => ({...prevState, userIdHelperText: `校验中...`}));
-            let res = await interfaces.getSecurityQuestion(params);
+            let res = await api.getSecurityQuestion(params);
             if(res && res.data.ErrorCode === 200){
                 setForgetPwdParams(prevState => ({...prevState, question: res.data.data.question}));
                 setErrorInput(prevState => ({...prevState, userIdHelperText: '请输入用户名'}));
