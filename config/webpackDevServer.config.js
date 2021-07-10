@@ -102,11 +102,11 @@ module.exports = function (proxy, allowedHost) {
     public: allowedHost,
     // `proxy` is run between `before` and `after` `webpack-dev-server` hooks
     proxy:{
-      "/":{
-        target: "http://127.0.0.1:3000",
+      "/api":{
+        target: "http://127.0.0.1:3100",
         changeOrigin: true,
         pathRewrite: {
-          "^/":"/"
+          "^/api":"/api"
         }
       }
     },

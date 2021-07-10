@@ -3,7 +3,7 @@ import React, { useEffect, useState, createContext, useContext, useRef } from 'r
 import { makeStyles } from '@material-ui/core';
 import { TextField, Grid, Typography, Button, Icon, IconButton, Tooltip, CircularProgress } from '@material-ui/core';
 import { InputAdornment, Collapse } from '@material-ui/core';
-import { Slide, alert } from '@/assets/component'
+import { Slide, Alert } from '@/assets/component'
 
 import common from '@/assets/js/common'
 import api from '@/api/index';
@@ -425,7 +425,7 @@ const ForgetPwdComponent = props => {
             let res = await api.forgetPwd(params);
             console.log(res);
             if(res && res.data.ErrorCode === 200){
-                alert().open({ content: '修改成功！' });
+                Alert.success('修改成功！');
                 setLoginType(1);
             }
         }

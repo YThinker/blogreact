@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import todolistless from './todolist.module.less';
 import inputModal from '../../assets/component/inputModal';
-import alert from '../../assets/component/alert';
+import {Alert} from '@/assets/component';
 import deleteIcon from '../../assets/todolist/delete.svg';
 // import qs from 'query-string';
 
@@ -20,9 +20,7 @@ function TodoList(props) {
             console.log(todoList);
         }
         else {
-            alert().open({
-                context: '请输入计划'
-            });
+            Alert.warning('请输入计划');
         }
     }
 

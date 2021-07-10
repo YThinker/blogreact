@@ -1,22 +1,22 @@
 import axios from 'axios';
-import alert from '@/assets/component/alert';
+import {Alert} from '@/assets/component';
 
 import store from "@/store/index";
 
 export default async function fetch() {
     const res = await _request(...arguments).catch( err => {
         console.error(err);
-        alert().open({content: 'Network Error', type: 'warning'});
+        Alert.Error('Network Error');
     });
     if(res?.data.errorCode === 10001){
         // 跳转到登录页面 提示未登录
-        alert().open({content: '未登录', type: 'warning'});
+        Alert.Error('未登录');
         window._reacthistory.push('/login');
     } else if(res?.data.errorCode === 10002){
         // 提示权限不足
-        alert().open({content: '权限不足', type: 'warning'});
+        Alert.Error('权限不足');
     } else if(res && res.data.errorCode !== 0){
-        alert().open({content: res.data.message, type: 'error'});
+        Alert.Error(res.data.message);
     }
     return res;
 }

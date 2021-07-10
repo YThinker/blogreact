@@ -1,5 +1,5 @@
-import _Slide from './Slide';
-import _alert from './alert';
+import _Slide from './Slide/Slide';
+import _Alert from './Alert/Alert';
 
 export const Slide = _Slide;
-export const alert = _alert;
+export const Alert = _Alert;

@@ -1,9 +1,9 @@
 import fetch from './fetch';
 
-export default {
+const api = {
     //获取验证码
     async getVerifyCode(params) {
-        let url = '/commonapi/getImageCaptcha';
+        let url = '/api/commonapi/getImageCaptcha';
         return fetch(url, params, 'GET');
     },
     // 获取用户信息
@@ -41,4 +41,6 @@ export default {
         let url = '/getUserInfoSecurity';
         return fetch(url, params, 'GET');
     },
-};
+}
+
+export default api;
